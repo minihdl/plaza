@@ -1,0 +1,17 @@
+[package]
+name = "plaza"
+version = "0.1.0"
+authors = ["Julian Blake Kongslie <jblake@jblake.org>"]
+
+[dependencies]
+internship = "0.2.0"
+itertools = "0.10.0"
+lazy_static = "1.4.0"
+
+[lib]
+name = "plaza"
+path = "src/lib.rs"
+
+[[bin]]
+name = "hex7seg"
+path = "examples/hex7seg.rs"
