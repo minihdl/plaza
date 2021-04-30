@@ -56,9 +56,9 @@ impl TruthTable {
 
     pub fn dnf(&self) -> Product {
         match self {
-            TruthTable::AlwaysTrue => Product { invert: false, terms: Vec::new() },
+            TruthTable::AlwaysTrue => Product { invert: true, terms: Vec::new() },
 
-            TruthTable::AlwaysFalse => Product { invert: true, terms: Vec::new() },
+            TruthTable::AlwaysFalse => Product { invert: false, terms: Vec::new() },
 
             TruthTable::Explicit{vars, ..} => {
                 let mut terms = Vec::new();
