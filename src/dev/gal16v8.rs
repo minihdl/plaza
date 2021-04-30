@@ -163,10 +163,10 @@ impl GAL16V8 {
             if let Some(mode) = self.outputs.get(pin) {
                 match mode {
 
-                    OutputMode::Disabled => out!("  *N Unused *L{:0>4} 0\n", fuses.ac1)?,
+                    OutputMode::Disabled => out!("  *N Unused *L{:0>4} 1\n", fuses.ac1)?,
 
                     OutputMode::Combinatorial{tt} => {
-                        out!("  *N Combinatorial *L{:0>4} 1\n", fuses.ac1)?;
+                        out!("  *N Combinatorial *L{:0>4} 0\n", fuses.ac1)?;
 
                         let prod;
                         let pos_prod = tt.dnf();
