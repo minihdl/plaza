@@ -2,6 +2,7 @@ use lazy_static::lazy_static;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::io;
+use std::num;
 
 use truthtable::*;
 use var::*;
@@ -140,20 +141,32 @@ impl GAL16V8 {
 
     #[must_use]
     pub fn write(&self, f: &mut dyn io::Write) -> io::Result<()> {
-        write!(f, "*N GAL16V8 fuse layout\n  *F0 *G0 *QF2194\n\n")?;
+        let mut checksum = num::Wrapping(0);
+        fn write(checksum: &mut num::Wrapping<u16>, f: &mut dyn io::Write, s: String) -> io::Result<()> {
+            for c in s.chars() {
+                *checksum += num::Wrapping(c as u16);
+            }
+            write!(f, "{}", s)
+        }
 
-        write!(f, "*N Simple mode\n  *L{:0>4} 1 *L{:0>4} 0\n", SYN, AC0)?;
+        macro_rules! out {
+            ($($x:tt)*) => (write(&mut checksum, f, format!($($x)*)));
+        }
+
+        out!("\x02\n\n*N GAL16V8 fuse layout\n  *F0 *G0 *QF2194\n\n")?;
+
+        out!("*N Simple mode\n  *L{:0>4} 1 *L{:0>4} 0\n", SYN, AC0)?;
 
         for (pin, fuses) in OUTPUTS.iter() {
-            write!(f, "\n*N Macrocell for pin {}\n", pin)?;
+            out!("\n*N Macrocell for pin {}\n", pin)?;
 
             if let Some(mode) = self.outputs.get(pin) {
                 match mode {
 
-                    OutputMode::Disabled => write!(f, "  *N Unused *L{:0>4} 0\n", fuses.ac1)?,
+                    OutputMode::Disabled => out!("  *N Unused *L{:0>4} 0\n", fuses.ac1)?,
 
                     OutputMode::Combinatorial{tt} => {
-                        write!(f, "  *N Combinatorial *L{:0>4} 1\n", fuses.ac1)?;
+                        out!("  *N Combinatorial *L{:0>4} 1\n", fuses.ac1)?;
 
                         let prod;
                         let pos_prod = tt.dnf();
@@ -170,13 +183,13 @@ impl GAL16V8 {
                         }
 
                         if prod.invert {
-                            write!(f, "  *N Negative polarity *L{:0>4} 0\n", fuses.xor)?;
+                            out!("  *N Negative polarity *L{:0>4} 0\n", fuses.xor)?;
                         } else {
-                            write!(f, "  *N Positive polarity *L{:0>4} 1\n", fuses.xor)?;
+                            out!("  *N Positive polarity *L{:0>4} 1\n", fuses.xor)?;
                         }
 
                         for (i, term) in prod.terms.iter().enumerate() {
-                            write!(f, "  *L{:0>4} 1 *L{:0>4} ", fuses.ptd + (i as u32), fuses.pts[i])?;
+                            out!("  *L{:0>4} 1 *L{:0>4} ", fuses.ptd + (i as u32), fuses.pts[i])?;
 
                             let mut ordered_term: Vec<Factor> = (0..INPUTS.len()).map(|_| Factor::DontCare).collect();
 
@@ -202,21 +215,25 @@ impl GAL16V8 {
 
                             for factor in ordered_term {
                                 match factor {
-                                    Factor::DontCare => write!(f, "11")?,
-                                    Factor::IsFalse => write!(f, "10")?,
-                                    Factor::IsTrue => write!(f, "01")?,
+                                    Factor::DontCare => out!("11")?,
+                                    Factor::IsFalse => out!("10")?,
+                                    Factor::IsTrue => out!("01")?,
                                 }
                             }
 
-                            write!(f, "\n")?;
+                            out!("\n")?;
                         }
                     },
 
                 }
             } else {
-                write!(f, "  *N Unused *L{:0>4} 0\n", fuses.ac1)?;
+                out!("  *N Unused *L{:0>4} 0\n", fuses.ac1)?;
             }
         }
+
+        out!("\n*N End of image.\n\n\x03")?;
+
+        write!(f, "{:0>4X}\n", checksum)?;
 
         Ok(())
     }
