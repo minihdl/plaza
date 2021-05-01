@@ -19,8 +19,8 @@ struct Output {
 }
 
 // Output modes supported:
-//  SYN=1 AC0=0 AC1=0   disabled (always high impedence)
-//  SYN=1 AC0=0 AC1=1   combinatorial (always low impedence)
+//  SYN=1 AC0=0 AC1=1   disabled (always high impedence)
+//  SYN=1 AC0=0 AC1=0   combinatorial (always low impedence)
 
 #[derive(Clone, Debug)]
 enum OutputMode {
