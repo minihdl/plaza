@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::ops;
 
-use var::*;
+use crate::var::*;
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Factor {

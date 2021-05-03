@@ -4,8 +4,8 @@ use std::fmt;
 use std::io;
 use std::num;
 
-use truthtable::*;
-use var::*;
+use crate::truthtable::*;
+use crate::var::*;
 
 const SYN: u32 = 0x890;
 const AC0: u32 = 0x891;

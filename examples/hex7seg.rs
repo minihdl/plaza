@@ -1,5 +1,3 @@
-extern crate plaza;
-
 use std::io;
 
 fn main() {
